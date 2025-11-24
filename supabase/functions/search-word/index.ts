@@ -106,9 +106,27 @@ serve(async (req) => {
     }
 
     // Generate image URL using free Pollinations.ai API
-    // This is a free AI image generation API (no key needed, completely free!)
+    // Create a realistic image prompt based on the word's actual description
     const targetWord = word.toLowerCase()
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(targetWord)}%20cartoon%20cute?width=1024&height=1024`
+    
+    // Build a realistic image prompt from the AI-generated content
+    let imagePrompt = targetWord
+    if (aiContent.definition_en_simple) {
+      // Use the simple English definition to create a more accurate image prompt
+      const simpleDef = aiContent.definition_en_simple.toLowerCase()
+      // Extract key descriptive words (remove common words)
+      const commonWords = ['a', 'an', 'the', 'is', 'are', 'that', 'this', 'with', 'for', 'and', 'or', 'but']
+      const words = simpleDef.split(/\s+/).filter(w => w.length > 3 && !commonWords.includes(w))
+      if (words.length > 0) {
+        imagePrompt = `${targetWord}, ${words.slice(0, 3).join(', ')}, realistic, high quality, detailed`
+      } else {
+        imagePrompt = `${targetWord}, realistic, high quality, detailed, photograph`
+      }
+    } else {
+      imagePrompt = `${targetWord}, realistic, high quality, detailed, photograph`
+    }
+    
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=1024&height=1024&model=flux&enhance=true`
 
     // Generate a unique ID for the word
     const wordId = crypto.randomUUID()
