@@ -93,6 +93,11 @@ serve(async (req) => {
       }
     }
 
+    // Generate image URL using free Pollinations.ai API
+    // This is a free AI image generation API (no key needed, completely free!)
+    const targetWord = word.toLowerCase()
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(targetWord)}%20cartoon%20cute?width=1024&height=1024`
+
     // Generate a unique ID for the word
     const wordId = crypto.randomUUID()
 
@@ -107,7 +112,7 @@ serve(async (req) => {
         tags: aiContent.tags || []
       },
       assets: {
-        image_url: aiContent.image_url || ''
+        image_url: imageUrl  // Use free Pollinations.ai generated image
       }
     }
 
