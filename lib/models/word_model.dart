@@ -4,7 +4,10 @@ class Word {
   final String definitionZh;
   final String definitionEnSimple;
   final String definitionAiKid;
+  final String partOfSpeech; // ✅ 新增
   final String imageUrl;
+  final String phoneticUs; // ✅ 新增
+  final String phoneticUk; // ✅ 新增
   final List<String> tags;
 
   Word({
@@ -13,7 +16,10 @@ class Word {
     required this.definitionZh,
     required this.definitionEnSimple,
     required this.definitionAiKid,
+    required this.partOfSpeech, // ✅
     required this.imageUrl,
+    required this.phoneticUs, // ✅
+    required this.phoneticUk, // ✅
     required this.tags,
   });
 
@@ -28,7 +34,10 @@ class Word {
       definitionZh: content['definition_zh'] ?? '暂无中文',
       definitionEnSimple: content['definition_en_simple'] ?? '',
       definitionAiKid: content['definition_ai_kid'] ?? '思考中...',
+      partOfSpeech: content['part_of_speech'] ?? 'word', // ✅ 默认值
       imageUrl: assets['image_url'] ?? '',
+      phoneticUs: content['phonetic_us'] ?? '', // ✅
+      phoneticUk: content['phonetic_uk'] ?? '', // ✅
       tags: List<String>.from(content['tags'] ?? []),
     );
   }

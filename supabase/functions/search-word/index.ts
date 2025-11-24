@@ -51,13 +51,19 @@ serve(async (req) => {
           },
           {
             role: 'user',
-            content: `Please provide information about the word "${word}" in JSON format with the following structure: {
-              "definition_zh": "中文定义（简单易懂）",
-              "definition_en_simple": "simple English definition for children",
-              "definition_ai_kid": "a fun, kid-friendly explanation",
-              "tags": ["tag1", "tag2"],
-              "image_url": ""
-            }`
+            content: `Explain "${word}" for a kid (8-12). 
+
+Return JSON:
+
+{
+  "definition_zh": "Chinese meaning",
+  "definition_en_simple": "Simple English definition",
+  "definition_ai_kid": "Fun analogy starting with 'Imagine...'",
+  "part_of_speech": "Part of speech (e.g. noun, verb)",
+  "phonetic_us": "US IPA phonetic (e.g. /wɔːtər/)",
+  "phonetic_uk": "UK IPA phonetic (e.g. /wɒtə/)",
+  "tags": ["tag1", "tag2"]
+}`
           }
         ],
         temperature: 0.7,
@@ -139,6 +145,9 @@ serve(async (req) => {
         definition_zh: aiContent.definition_zh || '暂无中文',
         definition_en_simple: aiContent.definition_en_simple || '',
         definition_ai_kid: aiContent.definition_ai_kid || '思考中...',
+        part_of_speech: aiContent.part_of_speech || 'word',
+        phonetic_us: aiContent.phonetic_us || '',
+        phonetic_uk: aiContent.phonetic_uk || '',
         tags: aiContent.tags || []
       },
       assets: {

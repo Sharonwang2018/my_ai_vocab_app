@@ -1,71 +1,109 @@
 # 🚀 立即部署指南
 
-## 已完成的更新
+## ✅ 已完成的工作
 
-✅ 代码已更新为使用 **OpenRouter API** (DeepSeek 模型)  
-✅ 所有密钥已从代码中移除  
-✅ 代码已推送到 GitHub
+1. **代码更新**
+   - ✅ 真实图片生成（基于单词描述）
+   - ✅ Enter 键搜索功能
+   - ✅ 图片显示改进（完整显示、加载状态、错误处理）
+   - ✅ 所有代码已推送到 GitHub
 
-## 部署步骤
+2. **功能改进**
+   - ✅ ProbeX API 代理集成
+   - ✅ 图片生成从卡通风格改为真实风格
+   - ✅ 前端用户体验改进
 
-### 1. 登录 Supabase CLI
+## ❌ 待完成的部署
 
-```bash
-supabase login
-```
+### 1. 部署 Supabase Edge Functions
 
-这会在浏览器中打开登录页面，完成登录后返回终端。
+需要在 Supabase Dashboard 中更新两个函数：
 
-### 2. 运行部署脚本
+#### 更新 search-word 函数
+
+1. 访问: https://supabase.com/dashboard/project/xsqeicialxvfzfzxjorn/functions/search-word
+2. 点击 "Edit" 或直接在编辑器中
+3. 复制以下文件的完整内容：
+   ```
+   /Users/ss/my_ai_vocab_app/supabase/functions/search-word/index.ts
+   ```
+4. 粘贴替换现有代码
+5. 点击 "Deploy"
+
+#### 更新 generate-story 函数
+
+1. 访问: https://supabase.com/dashboard/project/xsqeicialxvfzfzxjorn/functions/generate-story
+2. 点击 "Edit"
+3. 复制以下文件的完整内容：
+   ```
+   /Users/ss/my_ai_vocab_app/supabase/functions/generate-story/index.ts
+   ```
+4. 粘贴替换现有代码
+5. 点击 "Deploy"
+
+### 2. 重新构建和部署前端应用
+
+#### 方式 1: 本地构建 + S3 部署
 
 ```bash
 cd /Users/ss/my_ai_vocab_app
-./deploy-with-keys.sh
+
+# 构建 Flutter Web
+flutter build web --release \
+  --dart-define=SUPABASE_URL=https://xsqeicialxvfzfzxjorn.supabase.co \
+  --dart-define=SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzcWVpY2lhbHh2Znpmenhqb3JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM3ODA2ODIsImV4cCI6MjA3OTM1NjY4Mn0.hIOzK-O1yohy1bGsOIK0p3ttJMePfS9NHzVs1GE2-Xg
+
+# 部署到 S3
+aws s3 sync build/web s3://my-ai-vocab-app-deploy --delete
 ```
 
-这个脚本会自动：
-- 链接到你的 Supabase 项目
-- 设置环境变量（OpenRouter API key 和 Supabase service role key）
-- 部署两个 Edge Functions
+#### 方式 2: 使用 AWS Amplify（如果配置了）
 
-### 3. 或者手动部署
+如果 Amplify 已配置环境变量，它会自动从 GitHub 拉取最新代码并重新构建。
 
-如果脚本有问题，可以手动执行：
+1. 访问: https://console.aws.amazon.com/amplify
+2. 选择应用
+3. 点击 "Redeploy this version" 或等待自动部署
+
+## 🧪 验证部署
+
+### 测试后端函数
 
 ```bash
-# 1. 链接项目
-supabase link --project-ref xsqeicialxvfzfzxjorn
-
-# 2. 设置密钥
-supabase secrets set OPENROUTER_API_KEY=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
-supabase secrets set SUPABASE_SERVICE_ROLE_KEY=sb_secret_pIoDdiE13nNVlnFL5u8MAQ_-70vQ5V3
-
-# 3. 部署函数
-supabase functions deploy search-word
-supabase functions deploy generate-story
+curl -X POST https://xsqeicialxvfzfzxjorn.supabase.co/functions/v1/search-word \
+  -H "Authorization: Bearer YOUR_ANON_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"word": "apple"}'
 ```
 
-## 验证部署
+检查：
+- ✅ 返回单词信息
+- ✅ 图片 URL 包含 "realistic" 或 "flux"
+- ✅ 图片 URL 基于单词描述生成
 
-部署成功后，访问应用并测试：
+### 测试前端应用
 
-```
-http://my-ai-vocab-app-deploy.s3-website-us-east-1.amazonaws.com
-```
+访问: http://my-ai-vocab-app-deploy.s3-website-us-east-1.amazonaws.com
 
-尝试搜索一个单词（如 "volcano"），应该可以正常工作了！
+测试：
+- ✅ 输入单词后按 Enter 键可以搜索
+- ✅ 图片完整显示（不被裁剪）
+- ✅ 图片是真实风格（不是卡通）
+- ✅ 图片加载时显示进度
 
-## 使用的技术
+## 📋 快速检查清单
 
-- **OpenRouter API**: 统一的 LLM 接口
-- **DeepSeek 模型**: 通过 OpenRouter 使用
-- **Supabase Edge Functions**: 后端函数
+- [ ] 更新 search-word 函数到 Supabase Dashboard
+- [ ] 更新 generate-story 函数到 Supabase Dashboard
+- [ ] 重新构建前端应用
+- [ ] 部署前端到 S3
+- [ ] 测试搜索功能
+- [ ] 测试图片显示
+- [ ] 测试 Enter 键搜索
 
-## 故障排除
+## 🎯 完成后的效果
 
-如果遇到问题：
-
-1. **检查登录状态**: `supabase projects list`
-2. **查看函数日志**: 在 Supabase Dashboard -> Edge Functions -> Logs
-3. **测试函数**: 直接访问函数 URL 测试
-
+- ✅ 搜索单词显示真实图片（基于描述）
+- ✅ 按 Enter 键即可搜索
+- ✅ 图片完整显示，有加载状态
+- ✅ 所有功能正常工作
