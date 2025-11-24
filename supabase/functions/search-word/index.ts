@@ -47,23 +47,25 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a helpful assistant that creates educational content for children learning English vocabulary. Provide word definitions in both Chinese and English, examples, and fun facts in a child-friendly way.'
+            content: 'You are a helpful assistant that creates educational content for children learning English vocabulary. Provide ACCURATE word definitions based on standard dictionaries (Oxford, Cambridge, Merriam-Webster). Definitions must be precise and correct. Provide word definitions in both Chinese and English, examples, and fun facts in a child-friendly way.'
           },
           {
             role: 'user',
-            content: `Explain "${word}" for a kid (8-12). 
+            content: `Provide ACCURATE dictionary definition for "${word}". Use standard dictionary definitions (Oxford, Cambridge, Merriam-Webster) as reference. Be precise and correct.
 
 Return JSON:
 
 {
-  "definition_zh": "Chinese meaning",
-  "definition_en_simple": "Simple English definition",
-  "definition_ai_kid": "Fun analogy starting with 'Imagine...'",
-  "part_of_speech": "Part of speech (e.g. noun, verb)",
-  "phonetic_us": "US IPA phonetic (e.g. /wɔːtər/)",
-  "phonetic_uk": "UK IPA phonetic (e.g. /wɒtə/)",
-  "tags": ["tag1", "tag2"]
-}`
+  "definition_zh": "Accurate Chinese translation based on standard dictionary",
+  "definition_en_simple": "ACCURATE English definition matching standard dictionaries (be precise, include key details like who uses it, what it's used for, etc.)",
+  "definition_ai_kid": "Fun, child-friendly explanation starting with 'Imagine...' that helps kids remember the word",
+  "part_of_speech": "Part of speech (e.g. noun, verb, adjective). If multiple, list them separated by comma",
+  "phonetic_us": "US IPA phonetic transcription (e.g. /ˈdʒɪmi/)",
+  "phonetic_uk": "UK IPA phonetic transcription (e.g. /ˈdʒɪmi/)",
+  "tags": ["relevant", "tags"]
+}
+
+IMPORTANT: The definition_en_simple must be ACCURATE and match standard dictionary definitions. Include important details like who uses the word, in what context, etc.`
           }
         ],
         temperature: 0.7,
