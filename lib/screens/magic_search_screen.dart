@@ -42,12 +42,32 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
   void _toggleHeart() async {
     if (_currentWord == null) return;
     // 乐观更新UI
+    final previousState = _isSaved;
     setState(() => _isSaved = !_isSaved);
     try {
       await _notebookService.toggleSaveWord(_currentWord!.id);
+      // 更新状态以反映实际保存状态
+      final actualState = await _notebookService.isWordSaved(_currentWord!.id);
+      if (mounted) {
+        setState(() => _isSaved = actualState);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(actualState ? '已加入生词库' : '已从生词库移除'),
+            duration: const Duration(seconds: 1),
+          ),
+        );
+      }
     } catch (e) {
-      setState(() => _isSaved = !_isSaved); // 回滚
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('操作失败，请重试')));
+      // 回滚
+      if (mounted) {
+        setState(() => _isSaved = previousState);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('操作失败: ${e.toString()}'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 
@@ -219,32 +239,47 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                  child: Image.network(
-                    _currentWord!.imageUrl,
-                    height: 200,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return Container(
-                        height: 200,
-                        color: Colors.grey[200],
-                        child: Center(
-                          child: CircularProgressIndicator(
-                            value: loadingProgress.expectedTotalBytes != null
-                                ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                                : null,
+                  child: _currentWord!.imageUrl.isNotEmpty
+                      ? Image.network(
+                          _currentWord!.imageUrl,
+                          height: 200,
+                          width: double.infinity,
+                          fit: BoxFit.cover,
+                          loadingBuilder: (context, child, loadingProgress) {
+                            if (loadingProgress == null) return child;
+                            return Container(
+                              height: 200,
+                              color: Colors.grey[200],
+                              child: Center(
+                                child: CircularProgressIndicator(
+                                  value: loadingProgress.expectedTotalBytes != null
+                                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                                      : null,
+                                ),
+                              ),
+                            );
+                          },
+                          errorBuilder: (context, error, stackTrace) => 
+                            Container(
+                              height: 200, 
+                              color: Colors.grey[200], 
+                              child: const Center(child: Icon(Icons.image_not_supported, size: 50))
+                            ),
+                        )
+                      : Container(
+                          height: 200,
+                          color: Colors.grey[200],
+                          child: const Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
+                                SizedBox(height: 10),
+                                Text('图片生成中...', style: TextStyle(color: Colors.grey)),
+                              ],
+                            ),
                           ),
                         ),
-                      );
-                    },
-                    errorBuilder: (context, error, stackTrace) => 
-                      Container(
-                        height: 200, 
-                        color: Colors.grey[200], 
-                        child: const Center(child: Icon(Icons.image_not_supported))
-                      ),
-                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(12.0),

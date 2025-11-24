@@ -9,11 +9,12 @@ class NotebookService {
 
   // 检查单词是否已收藏
   Future<bool> isWordSaved(String wordId) async {
-    if (_userId.isEmpty) return false;
+    final userId = _supabase.auth.currentUser?.id ?? '';
+    if (userId.isEmpty) return false;
     final data = await _supabase
         .from('user_vocab')
         .select()
-        .eq('user_id', _userId)
+        .eq('user_id', userId)
         .eq('word_id', wordId)
         .maybeSingle();
     return data != null;
@@ -21,13 +22,26 @@ class NotebookService {
 
   // 切换收藏状态
   Future<void> toggleSaveWord(String wordId) async {
-    if (_userId.isEmpty) throw Exception("请先登录");
+    // 如果用户未登录，尝试匿名登录
+    if (_userId.isEmpty) {
+      try {
+        await _supabase.auth.signInAnonymously();
+      } catch (e) {
+        // 如果匿名登录失败，使用临时用户ID
+        throw Exception("无法保存，请检查网络连接");
+      }
+    }
+    
+    final currentUserId = _supabase.auth.currentUser?.id ?? '';
+    if (currentUserId.isEmpty) {
+      throw Exception("无法获取用户信息");
+    }
     
     final isSaved = await isWordSaved(wordId);
     if (isSaved) {
-      await _supabase.from('user_vocab').delete().eq('user_id', _userId).eq('word_id', wordId);
+      await _supabase.from('user_vocab').delete().eq('user_id', currentUserId).eq('word_id', wordId);
     } else {
-      await _supabase.from('user_vocab').insert({'user_id': _userId, 'word_id': wordId});
+      await _supabase.from('user_vocab').insert({'user_id': currentUserId, 'word_id': wordId});
     }
   }
 
