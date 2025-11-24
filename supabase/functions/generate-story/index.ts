@@ -57,8 +57,8 @@ serve(async (req) => {
       )
     }
 
-    // Call DeepSeek API directly
-    const deepseekResponse = await fetch('https://api.deepseek.com/v1/chat/completions', {
+    // Call DeepSeek API via ProbeX proxy
+    const deepseekResponse = await fetch('https://api.probex.top/v1/chat/completions', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
