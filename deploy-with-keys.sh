@@ -14,7 +14,7 @@ if ! supabase projects list &>/dev/null 2>&1; then
 fi
 
 PROJECT_REF="xsqeicialxvfzfzxjorn"
-OPENROUTER_KEY="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"
+DEEPSEEK_KEY="sk-7XpwEb0Wql59BrrScyWkkxRLD2s5CunbyuofnQPEz6IDdlAJ"
 SUPABASE_SERVICE_KEY="sb_secret_pIoDdiE13nNVlnFL5u8MAQ_-70vQ5V3"
 
 echo "📦 链接到项目: $PROJECT_REF"
@@ -27,7 +27,7 @@ fi
 
 echo ""
 echo "🔑 设置环境变量..."
-supabase secrets set OPENROUTER_API_KEY=$OPENROUTER_KEY
+supabase secrets set DEEPSEEK_API_KEY=$DEEPSEEK_KEY
 supabase secrets set SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_KEY
 
 echo ""
