@@ -2,7 +2,8 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const DEEPSEEK_API_KEY = Deno.env.get('DEEPSEEK_API_KEY')
-const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || ''
+// Supabase automatically provides these via Deno.env
+const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || Deno.env.get('SUPABASE_PROJECT_URL') || ''
 const SERVICE_ROLE_KEY = Deno.env.get('SERVICE_ROLE_KEY') || ''
 
 const corsHeaders = {
@@ -83,10 +84,20 @@ serve(async (req) => {
     })
 
     if (!deepseekResponse.ok) {
-      const error = await deepseekResponse.text()
-      console.error('DeepSeek API error:', error)
+      const errorText = await deepseekResponse.text()
+      console.error('DeepSeek API error:', errorText)
+      let errorMessage = 'Failed to generate story'
+      try {
+        const errorJson = JSON.parse(errorText)
+        errorMessage = errorJson.error?.message || errorText
+      } catch (e) {
+        errorMessage = errorText || 'Unknown error'
+      }
       return new Response(
-        JSON.stringify({ error: 'Failed to generate story' }),
+        JSON.stringify({ 
+          error: errorMessage,
+          details: 'DeepSeek API call failed. Check logs for more information.'
+        }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
