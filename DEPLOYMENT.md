@@ -32,9 +32,9 @@ Amplify 会自动检测 `amplify.yml` 文件，但需要确保环境变量已设
 
 1. 在 Amplify Console 中，进入你的应用
 2. 点击左侧菜单 "App settings" -> "Environment variables"
-3. 添加以下环境变量：
-   - `SUPABASE_URL` = `https://xsqeicialxvfzfzxjorn.supabase.co`
-   - `SUPABASE_ANON_KEY` = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzcWVpY2lhbHh2Znpmenhqb3JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM3ODA2ODIsImV4cCI6MjA3OTM1NjY4Mn0.hIOzK-O1yohy1bGsOIK0p3ttJMePfS9NHzVs1GE2-Xg`
+3. 添加以下环境变量（从你的 Supabase 项目设置中获取）：
+   - `SUPABASE_URL`: 你的 Supabase 项目 URL
+   - `SUPABASE_ANON_KEY`: 你的 Supabase 匿名密钥
 
 ### 步骤 4: 部署
 
@@ -80,9 +80,9 @@ Amplify will automatically detect the `amplify.yml` file, but you need to ensure
 
 1. In Amplify Console, go to your app
 2. Click "App settings" -> "Environment variables"
-3. Add the following environment variables:
-   - `SUPABASE_URL` = `https://xsqeicialxvfzfzxjorn.supabase.co`
-   - `SUPABASE_ANON_KEY` = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzcWVpY2lhbHh2Znpmenhqb3JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM3ODA2ODIsImV4cCI6MjA3OTM1NjY4Mn0.hIOzK-O1yohy1bGsOIK0p3ttJMePfS9NHzVs1GE2-Xg`
+3. Add the following environment variables (get from your Supabase project settings):
+   - `SUPABASE_URL`: Your Supabase project URL
+   - `SUPABASE_ANON_KEY`: Your Supabase anonymous key
 
 ### Step 4: Deploy
 
@@ -106,7 +106,7 @@ aws amplify create-app \
   --repository https://github.com/Sharonwang2018/my_ai_vocab_app \
   --platform WEB \
   --environment-variables \
-    SUPABASE_URL=https://xsqeicialxvfzfzxjorn.supabase.co,SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzcWVpY2lhbHh2Znpmenhqb3JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM3ODA2ODIsImV4cCI6MjA3OTM1NjY4Mn0.hIOzK-O1yohy1bGsOIK0p3ttJMePfS9NHzVs1GE2-Xg
+    SUPABASE_URL=YOUR_SUPABASE_URL,SUPABASE_ANON_KEY=YOUR_SUPABASE_ANON_KEY
 
 # 然后创建分支和部署
 APP_ID=$(aws amplify list-apps --query 'apps[0].appId' --output text)

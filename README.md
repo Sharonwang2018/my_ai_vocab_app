@@ -38,10 +38,13 @@ A Flutter app for kids vocabulary learning built with Supabase and OpenAI.
 
 应用使用以下环境变量（通过 AWS Amplify 配置）：
 
-- `SUPABASE_URL`: Supabase 项目 URL
-- `SUPABASE_ANON_KEY`: Supabase 匿名密钥
+- `SUPABASE_URL`: Supabase 项目 URL（必需）
+- `SUPABASE_ANON_KEY`: Supabase 匿名密钥（必需）
 
-**注意：** 所有敏感密钥都通过环境变量配置，不会提交到代码仓库。
+**注意：** 
+- 所有敏感密钥都通过环境变量配置，不会提交到代码仓库
+- 代码中不包含任何硬编码的密钥
+- OpenAI 密钥在 Supabase Edge Functions 中配置（在 Supabase 项目设置中）
 
 ## 本地开发 / Local Development
 

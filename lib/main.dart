@@ -6,15 +6,13 @@ import 'screens/story_lab_screen.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // ✅ 从环境变量读取 Supabase 配置
-  const supabaseUrl = String.fromEnvironment(
-    'SUPABASE_URL',
-    defaultValue: 'https://xsqeicialxvfzfzxjorn.supabase.co',
-  );
-  const supabaseAnonKey = String.fromEnvironment(
-    'SUPABASE_ANON_KEY',
-    defaultValue: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzcWVpY2lhbHh2Znpmenhqb3JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM3ODA2ODIsImV4cCI6MjA3OTM1NjY4Mn0.hIOzK-O1yohy1bGsOIK0p3ttJMePfS9NHzVs1GE2-Xg',
-  );
+  // ✅ 从环境变量读取 Supabase 配置（必须设置，无默认值）
+  const supabaseUrl = String.fromEnvironment('SUPABASE_URL');
+  const supabaseAnonKey = String.fromEnvironment('SUPABASE_ANON_KEY');
+  
+  if (supabaseUrl.isEmpty || supabaseAnonKey.isEmpty) {
+    throw Exception('SUPABASE_URL and SUPABASE_ANON_KEY must be set as environment variables');
+  }
   
   await Supabase.initialize(
     url: supabaseUrl,

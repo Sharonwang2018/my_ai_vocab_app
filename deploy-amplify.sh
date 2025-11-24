@@ -11,7 +11,7 @@ APP_RESPONSE=$(aws amplify create-app \
   --repository https://github.com/Sharonwang2018/my_ai_vocab_app \
   --platform WEB \
   --environment-variables \
-    SUPABASE_URL=https://xsqeicialxvfzfzxjorn.supabase.co,SUPABASE_ANON_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhzcWVpY2lhbHh2Znpmenhqb3JuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjM3ODA2ODIsImV4cCI6MjA3OTM1NjY4Mn0.hIOzK-O1yohy1bGsOIK0p3ttJMePfS9NHzVs1GE2-Xg \
+    SUPABASE_URL=${SUPABASE_URL},SUPABASE_ANON_KEY=${SUPABASE_ANON_KEY} \
   --output json 2>&1)
 
 if [ $? -eq 0 ]; then
