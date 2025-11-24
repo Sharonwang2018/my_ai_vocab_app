@@ -68,6 +68,8 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
                 filled: true,
                 fillColor: Colors.grey[100],
               ),
+              onSubmitted: (_) => _handleSearch(), // 按 Enter 键搜索
+              textInputAction: TextInputAction.search, // 设置键盘为搜索模式
             ),
             const SizedBox(height: 30),
             
@@ -96,7 +98,41 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
             children: [
               ClipRRect(
                 borderRadius: BorderRadius.circular(15),
-                child: Image.network(_currentWord!.imageUrl, height: 200, width: double.infinity, fit: BoxFit.cover),
+                child: Container(
+                  height: 200,
+                  width: double.infinity,
+                  color: Colors.grey[200],
+                  child: Image.network(
+                    _currentWord!.imageUrl,
+                    height: 200,
+                    width: double.infinity,
+                    fit: BoxFit.contain, // 改为 contain 以显示完整图片
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return Center(
+                        child: CircularProgressIndicator(
+                          value: loadingProgress.expectedTotalBytes != null
+                              ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                              : null,
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 200,
+                        color: Colors.grey[300],
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(Icons.broken_image, size: 50, color: Colors.grey[600]),
+                            const SizedBox(height: 10),
+                            Text('图片加载失败', style: TextStyle(color: Colors.grey[600])),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ),
               Positioned(
                 right: 10, top: 10,
