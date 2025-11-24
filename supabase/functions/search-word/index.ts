@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const OPENAI_API_KEY = Deno.env.get('OPENAI_API_KEY')
+const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY')
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || ''
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 
@@ -26,22 +26,24 @@ serve(async (req) => {
       )
     }
 
-    if (!OPENAI_API_KEY) {
+    if (!OPENROUTER_API_KEY) {
       return new Response(
-        JSON.stringify({ error: 'OPENAI_API_KEY is not configured' }),
+        JSON.stringify({ error: 'OPENROUTER_API_KEY is not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Call OpenAI API to generate word information
-    const openaiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+    // Call OpenRouter API (supports multiple LLMs including DeepSeek)
+    const openrouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://my-ai-vocab-app.com',
+        'X-Title': 'AI Kids Vocab App',
       },
       body: JSON.stringify({
-        model: 'gpt-3.5-turbo',
+        model: 'deepseek/deepseek-chat', // Using DeepSeek via OpenRouter
         messages: [
           {
             role: 'system',
@@ -63,17 +65,17 @@ serve(async (req) => {
       }),
     })
 
-    if (!openaiResponse.ok) {
-      const error = await openaiResponse.text()
-      console.error('OpenAI API error:', error)
+    if (!openrouterResponse.ok) {
+      const error = await openrouterResponse.text()
+      console.error('OpenRouter API error:', error)
       return new Response(
         JSON.stringify({ error: 'Failed to generate word information' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    const openaiData = await openaiResponse.json()
-    const content = openaiData.choices[0]?.message?.content || '{}'
+    const openrouterData = await openrouterResponse.json()
+    const content = openrouterData.choices[0]?.message?.content || '{}'
     
     // Parse the JSON response from OpenAI
     let aiContent
