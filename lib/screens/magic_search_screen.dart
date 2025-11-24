@@ -287,7 +287,7 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Text(label, style: TextStyle(fontSize: 10, color: post_primary_blue, fontWeight: FontWeight.bold)),
+                Text(label, style: const TextStyle(fontSize: 10, color: post_primary_blue, fontWeight: FontWeight.bold)),
                 Text(
                   phonetic.isNotEmpty ? phonetic : "/.../", 
                   style: const TextStyle(fontSize: 13, color: Colors.black87),
