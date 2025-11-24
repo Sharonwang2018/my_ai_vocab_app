@@ -1,7 +1,7 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
-const OPENROUTER_API_KEY = Deno.env.get('OPENROUTER_API_KEY')
+const DEEPSEEK_API_KEY = Deno.env.get('DEEPSEEK_API_KEY')
 const SUPABASE_URL = Deno.env.get('SUPABASE_URL') || ''
 const SUPABASE_SERVICE_ROLE_KEY = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') || ''
 
@@ -26,24 +26,22 @@ serve(async (req) => {
       )
     }
 
-    if (!OPENROUTER_API_KEY) {
+    if (!DEEPSEEK_API_KEY) {
       return new Response(
-        JSON.stringify({ error: 'OPENROUTER_API_KEY is not configured' }),
+        JSON.stringify({ error: 'DEEPSEEK_API_KEY is not configured' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    // Call OpenRouter API (supports multiple LLMs including DeepSeek)
-    const openrouterResponse = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+    // Call DeepSeek API directly
+    const deepseekResponse = await fetch('https://api.deepseek.com/v1/chat/completions', {
       method: 'POST',
       headers: {
-        'Authorization': `Bearer ${OPENROUTER_API_KEY}`,
+        'Authorization': `Bearer ${DEEPSEEK_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'https://my-ai-vocab-app.com',
-        'X-Title': 'AI Kids Vocab App',
       },
       body: JSON.stringify({
-        model: 'deepseek/deepseek-chat', // Using DeepSeek via OpenRouter
+        model: 'deepseek-chat',
         messages: [
           {
             role: 'system',
@@ -65,17 +63,17 @@ serve(async (req) => {
       }),
     })
 
-    if (!openrouterResponse.ok) {
-      const error = await openrouterResponse.text()
-      console.error('OpenRouter API error:', error)
+    if (!deepseekResponse.ok) {
+      const error = await deepseekResponse.text()
+      console.error('DeepSeek API error:', error)
       return new Response(
         JSON.stringify({ error: 'Failed to generate word information' }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    const openrouterData = await openrouterResponse.json()
-    const content = openrouterData.choices[0]?.message?.content || '{}'
+    const deepseekData = await deepseekResponse.json()
+    const content = deepseekData.choices[0]?.message?.content || '{}'
     
     // Parse the JSON response from OpenAI
     let aiContent
