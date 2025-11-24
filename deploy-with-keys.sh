@@ -15,7 +15,7 @@ fi
 
 PROJECT_REF="xsqeicialxvfzfzxjorn"
 DEEPSEEK_KEY="sk-7XpwEb0Wql59BrrScyWkkxRLD2s5CunbyuofnQPEz6IDdlAJ"
-SUPABASE_SERVICE_KEY="sb_secret_pIoDdiE13nNVlnFL5u8MAQ_-70vQ5V3"
+SERVICE_ROLE_KEY="sb_secret_pIoDdiE13nNVlnFL5u8MAQ_-70vQ5V3"
 
 echo "📦 链接到项目: $PROJECT_REF"
 supabase link --project-ref $PROJECT_REF
@@ -27,8 +27,9 @@ fi
 
 echo ""
 echo "🔑 设置环境变量..."
+echo "  注意: Supabase 不允许以 SUPABASE_ 开头的 secret 名称"
 supabase secrets set DEEPSEEK_API_KEY=$DEEPSEEK_KEY
-supabase secrets set SUPABASE_SERVICE_ROLE_KEY=$SUPABASE_SERVICE_KEY
+supabase secrets set SERVICE_ROLE_KEY=$SERVICE_ROLE_KEY
 
 echo ""
 echo "📤 部署 Edge Functions..."
