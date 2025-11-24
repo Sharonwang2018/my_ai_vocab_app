@@ -1,0 +1,25 @@
+name: my_ai_vocab_app
+description: A new Flutter project.
+publish_to: 'none'
+version: 1.0.0+1
+
+environment:
+  sdk: '>=3.0.0 <4.0.0'
+
+dependencies:
+  flutter:
+    sdk: flutter
+  # Supabase 数据库支持
+  supabase_flutter: ^2.0.0
+  # Markdown 渲染支持 (给故事用的)
+  flutter_markdown: ^0.6.14
+  # 图标库 (可选，为了好看)
+  cupertino_icons: ^1.0.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+
+flutter:
+  uses-material-design: true
