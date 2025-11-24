@@ -3,19 +3,19 @@ frontend:
   phases:
     preBuild:
       commands:
-        - echo "Installing Flutter SDK..."
+        - echo "Installing Flutter..."
         - |
-          cd $HOME
+          cd /tmp
           git clone https://github.com/flutter/flutter.git -b stable --depth 1
-          export PATH="$PATH:$HOME/flutter/bin"
-          flutter doctor -v
+          export PATH="$PATH:/tmp/flutter/bin"
+          /tmp/flutter/bin/flutter doctor
         - cd $CODEBUILD_SRC_DIR
-        - export PATH="$PATH:$HOME/flutter/bin"
+        - export PATH="$PATH:/tmp/flutter/bin"
         - flutter --version
         - flutter pub get
     build:
       commands:
-        - export PATH="$PATH:$HOME/flutter/bin"
+        - export PATH="$PATH:/tmp/flutter/bin"
         - flutter build web --release --dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
   artifacts:
     baseDirectory: build/web
@@ -23,7 +23,7 @@ frontend:
       - '**/*'
   cache:
     paths:
-      - $HOME/flutter/
+      - /tmp/flutter/
       - .dart_tool/
       - $HOME/.pub-cache
 
