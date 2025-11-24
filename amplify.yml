@@ -3,16 +3,17 @@ frontend:
   phases:
     preBuild:
       commands:
-        - echo "Installing Flutter..."
-        - wget -q https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.0-stable.tar.xz -O flutter.tar.xz
-        - tar xf flutter.tar.xz
-        - export PATH="$PATH:$(pwd)/flutter/bin"
-        - flutter doctor
+        - echo "Installing Flutter SDK..."
+        - cd /tmp
+        - wget -q https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_3.24.0-stable.tar.xz
+        - tar xf flutter_linux_3.24.0-stable.tar.xz
+        - export PATH="$PATH:/tmp/flutter/bin"
+        - cd $CODEBUILD_SRC_DIR
         - flutter --version
         - flutter pub get
     build:
       commands:
-        - export PATH="$PATH:$(pwd)/flutter/bin"
+        - export PATH="$PATH:/tmp/flutter/bin"
         - flutter build web --release --dart-define=SUPABASE_URL=$SUPABASE_URL --dart-define=SUPABASE_ANON_KEY=$SUPABASE_ANON_KEY
   artifacts:
     baseDirectory: build/web
@@ -20,7 +21,7 @@ frontend:
       - '**/*'
   cache:
     paths:
-      - flutter/
+      - /tmp/flutter/
       - .dart_tool/
       - $HOME/.pub-cache
 
