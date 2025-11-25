@@ -40,14 +40,24 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
   }
 
   void _toggleHeart() async {
-    if (_currentWord == null) return;
+    final word = _currentWord;
+    if (word == null || word.id.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('无法收藏：单词信息不完整'),
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+    
     // 乐观更新UI
     final previousState = _isSaved;
     setState(() => _isSaved = !_isSaved);
     try {
-      await _notebookService.toggleSaveWord(_currentWord!.id);
+      await _notebookService.toggleSaveWord(word.id);
       // 更新状态以反映实际保存状态
-      final actualState = await _notebookService.isWordSaved(_currentWord!.id);
+      final actualState = await _notebookService.isWordSaved(word.id);
       if (mounted) {
         setState(() => _isSaved = actualState);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -64,7 +74,7 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text('操作失败: ${e.toString()}'),
-            duration: const Duration(seconds: 2),
+            duration: const Duration(seconds: 3),
           ),
         );
       }

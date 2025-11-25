@@ -88,9 +88,10 @@ class NotebookService {
       }
     }
     
-    final currentUserId = currentUser.id;
+    // 安全地获取用户ID，避免空值错误
+    final currentUserId = currentUser?.id ?? '';
     if (currentUserId.isEmpty) {
-      throw Exception("无法获取用户信息");
+      throw Exception("无法获取用户信息：用户ID为空。请确保匿名登录成功。");
     }
     
     try {

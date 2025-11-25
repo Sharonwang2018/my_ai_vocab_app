@@ -25,7 +25,12 @@ void main() async {
     if (authResponse.user == null) {
       print("Warning: Anonymous login returned null user");
     } else {
-      print("Anonymous login successful: ${authResponse.user!.id}");
+      final userId = authResponse.user?.id ?? '';
+      if (userId.isNotEmpty) {
+        print("Anonymous login successful: $userId");
+      } else {
+        print("Warning: Anonymous login returned user with empty ID");
+      }
     }
   } catch (e) {
     print("Auth Init Error: $e");
