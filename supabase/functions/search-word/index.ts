@@ -47,25 +47,21 @@ serve(async (req) => {
         messages: [
           {
             role: 'system',
-            content: 'You are a helpful assistant that creates educational content for children learning English vocabulary. Provide ACCURATE word definitions based on standard dictionaries (Oxford, Cambridge, Merriam-Webster). Definitions must be precise and correct. Provide word definitions in both Chinese and English, examples, and fun facts in a child-friendly way.'
+            content: 'You are a helpful assistant that creates educational content for children learning English vocabulary. Provide word definitions in both Chinese and English, examples, and fun facts in a child-friendly way. Ensure definitions are accurate and precise, referencing standard dictionaries like Oxford, Cambridge, or Merriam-Webster. Include important details like who uses the word or in what context. Support multiple parts of speech.'
           },
           {
             role: 'user',
-            content: `Provide ACCURATE dictionary definition for "${word}". Use standard dictionary definitions (Oxford, Cambridge, Merriam-Webster) as reference. Be precise and correct.
-
+            content: `Explain "${word}" for a kid (8-12). 
 Return JSON:
-
 {
-  "definition_zh": "Accurate Chinese translation based on standard dictionary",
-  "definition_en_simple": "ACCURATE English definition matching standard dictionaries (be precise, include key details like who uses it, what it's used for, etc.)",
-  "definition_ai_kid": "Fun, child-friendly explanation starting with 'Imagine...' that helps kids remember the word",
-  "part_of_speech": "Part of speech (e.g. noun, verb, adjective). If multiple, list them separated by comma",
-  "phonetic_us": "US IPA phonetic transcription (e.g. /ˈdʒɪmi/)",
-  "phonetic_uk": "UK IPA phonetic transcription (e.g. /ˈdʒɪmi/)",
-  "tags": ["relevant", "tags"]
-}
-
-IMPORTANT: The definition_en_simple must be ACCURATE and match standard dictionary definitions. Include important details like who uses the word, in what context, etc.`
+  "definition_zh": "Chinese meaning",
+  "definition_en_simple": "Simple English definition",
+  "definition_ai_kid": "Fun analogy starting with 'Imagine...'",
+  "part_of_speech": "Part of speech (e.g. noun, verb, interjection)", 
+  "phonetic_us": "US IPA phonetic (e.g. /hai/)", 
+  "phonetic_uk": "UK IPA phonetic (e.g. /hai/)",
+  "tags": ["tag1", "tag2"]
+}`
           }
         ],
         temperature: 0.7,
@@ -108,30 +104,66 @@ IMPORTANT: The definition_en_simple must be ACCURATE and match standard dictiona
         definition_zh: '暂无中文定义',
         definition_en_simple: content.substring(0, 200),
         definition_ai_kid: content.substring(0, 150),
+        part_of_speech: 'word',
+        phonetic_us: '',
+        phonetic_uk: '',
         tags: [],
         image_url: ''
       }
     }
 
-    // Generate image URL with multiple fallback options for better reliability
+    // Generate image URL using free Pollinations.ai API
+    // Create a realistic image prompt based on the word's actual meaning
     const targetWord = word.toLowerCase()
     
-    // Strategy: Generate multiple image URL options
-    // The frontend can try them in order if one fails
+    // Build a more accurate image prompt from the AI-generated content
+    let imagePrompt = targetWord
     
-    // Option 1: Pollinations.ai - simple format (most compatible)
-    const imageUrl1 = `https://image.pollinations.ai/prompt/${encodeURIComponent(targetWord)}?width=1024&height=1024`
+    if (aiContent.definition_en_simple) {
+      const simpleDef = aiContent.definition_en_simple.toLowerCase()
+      
+      // Comprehensive stop words list
+      const stopWords = new Set([
+        'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+        'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should',
+        'can', 'could', 'may', 'might', 'must', 'shall', 'that', 'this',
+        'these', 'those', 'with', 'for', 'and', 'or', 'but', 'to', 'of',
+        'in', 'on', 'at', 'by', 'from', 'as', 'it', 'its', 'they', 'them',
+        'used', 'typically', 'usually', 'often', 'sometimes', 'generally',
+        'expression', 'word', 'term', 'means', 'meaning', 'refers', 'called'
+      ])
+      
+      // Extract meaningful words (nouns, verbs, adjectives) from definition
+      const words = simpleDef
+        .replace(/[^\w\s]/g, ' ') // Remove punctuation
+        .split(/\s+/)
+        .filter(w => w.length > 3 && !stopWords.has(w))
+        .slice(0, 5) // Take first 5 meaningful words
+      
+      if (words.length > 0) {
+        // Create a descriptive prompt based on the word's meaning
+        imagePrompt = `${targetWord}, ${words.join(', ')}, realistic, high quality, detailed, photograph`
+      } else {
+        // Fallback: use word with descriptive context based on part of speech
+        const partOfSpeech = aiContent.part_of_speech?.toLowerCase() || ''
+        if (partOfSpeech.includes('verb')) {
+          imagePrompt = `${targetWord} action, realistic, high quality, detailed, photograph`
+        } else if (partOfSpeech.includes('noun')) {
+          imagePrompt = `${targetWord} object, realistic, high quality, detailed, photograph`
+        } else if (partOfSpeech.includes('adjective')) {
+          imagePrompt = `${targetWord} quality, realistic, high quality, detailed, photograph`
+        } else if (partOfSpeech.includes('interjection') || partOfSpeech.includes('greeting')) {
+          // Special handling for greetings like "hi"
+          imagePrompt = `friendly greeting, waving hand, smiling person, realistic, high quality, detailed, photograph`
+        } else {
+          imagePrompt = `${targetWord}, realistic, high quality, detailed, photograph`
+        }
+      }
+    } else {
+      imagePrompt = `${targetWord}, realistic, high quality, detailed, photograph`
+    }
     
-    // Option 2: Pollinations.ai - with realistic modifier (better quality when it works)
-    const imageUrl2 = `https://image.pollinations.ai/prompt/${encodeURIComponent(targetWord + ' realistic photograph')}?width=1024&height=1024`
-    
-    // Option 3: Use a placeholder service as ultimate fallback
-    // This ensures there's always an image URL, even if generation fails
-    const fallbackUrl = `https://via.placeholder.com/1024x1024/4A90E2/FFFFFF?text=${encodeURIComponent(targetWord.toUpperCase())}`
-    
-    // For now, use the simple format as primary
-    // Frontend can implement retry logic with imageUrl2 as fallback
-    const imageUrl = imageUrl1
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=1024&height=1024&model=flux&enhance=true`
 
     // Generate a unique ID for the word
     const wordId = crypto.randomUUID()
@@ -209,4 +241,3 @@ IMPORTANT: The definition_en_simple must be ACCURATE and match standard dictiona
     )
   }
 })
-
