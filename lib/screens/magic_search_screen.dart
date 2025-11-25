@@ -256,7 +256,7 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
             children: [
               Expanded(
                 child: Text(
-                  _currentWord!.word,
+                  word.word,
                   style: const TextStyle(
                     fontSize: 36, 
                     fontWeight: FontWeight.w900, // Google 风格的超粗字体
@@ -282,9 +282,9 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
           const SizedBox(height: 8),
           Row(
             children: [
-              _buildAudioBtn("US", _currentWord!.phoneticUs, "en-US"),
+              _buildAudioBtn("US", word.phoneticUs, "en-US", word.word),
               const SizedBox(width: 15),
-              _buildAudioBtn("UK", _currentWord!.phoneticUk, "en-GB"),
+              _buildAudioBtn("UK", word.phoneticUk, "en-GB", word.word),
             ],
           ),
 
@@ -296,7 +296,7 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
           // 3. 词性 (italic 灰色斜体)
           // ------------------------------------------------
           Text(
-            _currentWord!.partOfSpeech.toLowerCase(),
+            word.partOfSpeech.toLowerCase(),
             style: const TextStyle(
               fontSize: 18,
               fontStyle: FontStyle.italic,
@@ -310,7 +310,7 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
           // 4. 英文解释
           // ------------------------------------------------
           Text(
-            _currentWord!.definitionEnSimple,
+            word.definitionEnSimple,
             style: const TextStyle(
               fontSize: 18,
               height: 1.5, // 增加行高，更易读
@@ -324,7 +324,7 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
           // 5. 中文翻译 (灰色辅助)
           // ------------------------------------------------
           Text(
-            _currentWord!.definitionZh,
+            word.definitionZh,
             style: const TextStyle(
               fontSize: 16,
               color: Colors.grey,
@@ -347,7 +347,7 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                  child: _buildImageWithRetry(_currentWord!.imageUrl),
+                  child: _buildImageWithRetry(word.imageUrl),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(12.0),
@@ -357,7 +357,7 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
                       const SizedBox(width: 8),
                       Expanded(
                         child: Text(
-                          "记忆小贴士: ${_currentWord!.definitionAiKid}",
+                          "记忆小贴士: ${word.definitionAiKid}",
                           style: TextStyle(fontSize: 14, color: Colors.grey[800]),
                         ),
                       ),
@@ -373,9 +373,9 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
   }
 
   // 🔵 专门用来画那个蓝色喇叭按钮的小组件
-  Widget _buildAudioBtn(String label, String phonetic, String accent) {
+  Widget _buildAudioBtn(String label, String phonetic, String accent, String word) {
     return InkWell(
-      onTap: () => _speak(_currentWord!.word, accent),
+      onTap: () => _speak(word, accent),
       borderRadius: BorderRadius.circular(30),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
