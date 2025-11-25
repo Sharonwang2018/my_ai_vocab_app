@@ -54,8 +54,8 @@ class _StoryLabScreenState extends State<StoryLabScreen> {
 
   @override
   Widget build(BuildContext context) {
+    // AppBar 由 MainNavScreen 统一管理
     return Scaffold(
-      appBar: AppBar(title: const Text("✨ 故事实验室")),
       body: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(

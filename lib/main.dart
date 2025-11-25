@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'screens/magic_search_screen.dart';
 import 'screens/story_lab_screen.dart';
+import 'services/user_service.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -64,18 +65,129 @@ class MainNavScreen extends StatefulWidget {
 
 class _MainNavScreenState extends State<MainNavScreen> {
   int _currentIndex = 0;
+  final _userService = UserService();
+  int _vocabCount = 0;
+  
   final List<Widget> _pages = [
     const MagicSearchScreen(),
     const StoryLabScreen(),
   ];
 
   @override
+  void initState() {
+    super.initState();
+    _loadUserInfo();
+  }
+  
+  Future<void> _loadUserInfo() async {
+    final count = await _userService.getUserVocabCount();
+    if (mounted) {
+      setState(() => _vocabCount = count);
+    }
+  }
+  
+  Future<void> _switchUser() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('切换用户'),
+        content: const Text('切换用户将清除当前会话并创建新用户。\n\n注意：当前用户的词汇表将无法访问，但数据不会丢失。'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('取消'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('切换'),
+          ),
+        ],
+      ),
+    );
+    
+    if (confirm == true) {
+      try {
+        await _userService.switchUser();
+        await _loadUserInfo();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('已切换到新用户')),
+          );
+        }
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('切换失败: $e')),
+          );
+        }
+      }
+    }
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: Row(
+          children: [
+            Expanded(
+              child: Text(
+                _currentIndex == 0 ? '🔍 魔法单词搜' : '📚 故事实验',
+                style: const TextStyle(fontSize: 18),
+              ),
+            ),
+            // 用户信息
+            PopupMenuButton<String>(
+              icon: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.person, size: 20),
+                  const SizedBox(width: 4),
+                  Text(
+                    'ID: ${_userService.getShortUserId()}',
+                    style: const TextStyle(fontSize: 12),
+                  ),
+                ],
+              ),
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  enabled: false,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('用户 ID: ${_userService.getShortUserId()}'),
+                      Text('词汇数: $_vocabCount', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                    ],
+                  ),
+                ),
+                const PopupMenuDivider(),
+                PopupMenuItem(
+                  value: 'switch',
+                  child: const Row(
+                    children: [
+                      Icon(Icons.swap_horiz, size: 18),
+                      SizedBox(width: 8),
+                      Text('切换用户'),
+                    ],
+                  ),
+                ),
+              ],
+              onSelected: (value) {
+                if (value == 'switch') {
+                  _switchUser();
+                }
+              },
+            ),
+          ],
+        ),
+      ),
       body: _pages[_currentIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _currentIndex,
-        onTap: (index) => setState(() => _currentIndex = index),
+        onTap: (index) {
+          setState(() => _currentIndex = index);
+          _loadUserInfo(); // 切换页面时刷新用户信息
+        },
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.search), label: '魔法搜索'),
           BottomNavigationBarItem(icon: Icon(Icons.auto_stories), label: '故事实验'),

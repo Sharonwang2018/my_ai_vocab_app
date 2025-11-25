@@ -84,7 +84,6 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text("🔍 魔法单词搜"), centerTitle: true),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(20),
         child: Column(

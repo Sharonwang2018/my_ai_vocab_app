@@ -30,6 +30,8 @@ class NotebookService {
     // 确保用户已登录（匿名或正常）
     var currentUser = _supabase.auth.currentUser;
     
+    // 如果用户未登录，先尝试匿名登录
+    
     // 如果未登录，尝试匿名登录（最多重试3次）
     if (currentUser == null) {
       int retries = 3;
