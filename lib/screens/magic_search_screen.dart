@@ -108,6 +108,104 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
 
   // 定义一个 Google 蓝颜色常量
   static const Color post_primary_blue = Color(0xFF1A73E8);
+  
+  // 图片重试机制：如果主URL失败，尝试备用URL
+  Widget _buildImageWithRetry(String imageUrl) {
+    if (imageUrl.isEmpty) {
+      return Container(
+        height: 200,
+        color: Colors.grey[200],
+        child: const Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
+              SizedBox(height: 10),
+              Text('图片生成中...', style: TextStyle(color: Colors.grey)),
+            ],
+          ),
+        ),
+      );
+    }
+    
+    // 生成备用URL（添加 realistic 修饰符）
+    final primaryUrl = imageUrl;
+    final fallbackUrl = imageUrl.replaceAll(
+      RegExp(r'\?width=\d+&height=\d+'),
+      ' realistic photograph?width=1024&height=1024'
+    );
+    
+    return Image.network(
+      primaryUrl,
+      height: 200,
+      width: double.infinity,
+      fit: BoxFit.cover,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Container(
+          height: 200,
+          color: Colors.grey[200],
+          child: Center(
+            child: CircularProgressIndicator(
+              value: loadingProgress.expectedTotalBytes != null
+                  ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
+                  : null,
+            ),
+          ),
+        );
+      },
+      errorBuilder: (context, error, stackTrace) {
+        // 如果主URL失败，尝试备用URL
+        if (fallbackUrl != primaryUrl) {
+          return Image.network(
+            fallbackUrl,
+            height: 200,
+            width: double.infinity,
+            fit: BoxFit.cover,
+            loadingBuilder: (context, child, loadingProgress) {
+              if (loadingProgress == null) return child;
+              return Container(
+                height: 200,
+                color: Colors.grey[200],
+                child: const Center(child: CircularProgressIndicator()),
+              );
+            },
+            errorBuilder: (context, error, stackTrace) => 
+              Container(
+                height: 200, 
+                color: Colors.grey[200], 
+                child: const Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
+                      SizedBox(height: 10),
+                      Text('图片暂时无法加载', style: TextStyle(color: Colors.grey, fontSize: 12)),
+                    ],
+                  ),
+                ),
+              ),
+          );
+        }
+        
+        // 如果备用URL也失败，显示错误
+        return Container(
+          height: 200, 
+          color: Colors.grey[200], 
+          child: const Center(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
+                SizedBox(height: 10),
+                Text('图片暂时无法加载', style: TextStyle(color: Colors.grey, fontSize: 12)),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
 
   // 发音功能（使用 Web Speech API）
   void _speak(String word, String accent) {
@@ -239,47 +337,7 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
               children: [
                 ClipRRect(
                   borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-                  child: _currentWord!.imageUrl.isNotEmpty
-                      ? Image.network(
-                          _currentWord!.imageUrl,
-                          height: 200,
-                          width: double.infinity,
-                          fit: BoxFit.cover,
-                          loadingBuilder: (context, child, loadingProgress) {
-                            if (loadingProgress == null) return child;
-                            return Container(
-                              height: 200,
-                              color: Colors.grey[200],
-                              child: Center(
-                                child: CircularProgressIndicator(
-                                  value: loadingProgress.expectedTotalBytes != null
-                                      ? loadingProgress.cumulativeBytesLoaded / loadingProgress.expectedTotalBytes!
-                                      : null,
-                                ),
-                              ),
-                            );
-                          },
-                          errorBuilder: (context, error, stackTrace) => 
-                            Container(
-                              height: 200, 
-                              color: Colors.grey[200], 
-                              child: const Center(child: Icon(Icons.image_not_supported, size: 50))
-                            ),
-                        )
-                      : Container(
-                          height: 200,
-                          color: Colors.grey[200],
-                          child: const Center(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.center,
-                              children: [
-                                Icon(Icons.image_not_supported, size: 50, color: Colors.grey),
-                                SizedBox(height: 10),
-                                Text('图片生成中...', style: TextStyle(color: Colors.grey)),
-                              ],
-                            ),
-                          ),
-                        ),
+                  child: _buildImageWithRetry(_currentWord!.imageUrl),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(12.0),

@@ -113,31 +113,25 @@ IMPORTANT: The definition_en_simple must be ACCURATE and match standard dictiona
       }
     }
 
-    // Generate image URL with multiple fallback options for reliability
+    // Generate image URL with multiple fallback options for better reliability
     const targetWord = word.toLowerCase()
     
-    // Strategy: Try multiple image sources for better reliability
-    // 1. Primary: Pollinations.ai (free, no key needed)
-    // 2. Fallback: Use a more reliable format or alternative service
+    // Strategy: Generate multiple image URL options
+    // The frontend can try them in order if one fails
     
-    // Use simple prompt for maximum compatibility
-    const imagePrompt = targetWord
+    // Option 1: Pollinations.ai - simple format (most compatible)
+    const imageUrl1 = `https://image.pollinations.ai/prompt/${encodeURIComponent(targetWord)}?width=1024&height=1024`
     
-    // Primary image source: Pollinations.ai with simple format
-    // If this fails, we can add retry logic or use alternative sources
-    let imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=1024&height=1024`
+    // Option 2: Pollinations.ai - with realistic modifier (better quality when it works)
+    const imageUrl2 = `https://image.pollinations.ai/prompt/${encodeURIComponent(targetWord + ' realistic photograph')}?width=1024&height=1024`
     
-    // Alternative: Use a more reliable image service as fallback
-    // Option 1: Use a CDN with word-based image lookup (if available)
-    // Option 2: Use placeholder service that generates images on demand
-    // For now, we'll use Pollinations.ai but with better error handling
+    // Option 3: Use a placeholder service as ultimate fallback
+    // This ensures there's always an image URL, even if generation fails
+    const fallbackUrl = `https://via.placeholder.com/1024x1024/4A90E2/FFFFFF?text=${encodeURIComponent(targetWord.toUpperCase())}`
     
-    // Note: If Pollinations.ai is unreliable, consider:
-    // - Adding retry mechanism
-    // - Using alternative free services like:
-    //   * https://api.unsplash.com (requires free API key)
-    //   * https://api.pexels.com (requires free API key)
-    //   * Or use a word-to-image mapping service
+    // For now, use the simple format as primary
+    // Frontend can implement retry logic with imageUrl2 as fallback
+    const imageUrl = imageUrl1
 
     // Generate a unique ID for the word
     const wordId = crypto.randomUUID()
