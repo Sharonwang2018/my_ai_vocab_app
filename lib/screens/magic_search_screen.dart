@@ -235,6 +235,8 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
   }
 
   Widget _buildCard() {
+    final word = _currentWord;
+    if (word == null) return const SizedBox.shrink(); // Should not happen if _currentWord is checked
     return Container(
       width: double.infinity, // 占满宽度
       decoration: BoxDecoration(
