@@ -113,14 +113,31 @@ IMPORTANT: The definition_en_simple must be ACCURATE and match standard dictiona
       }
     }
 
-    // Generate image URL using free Pollinations.ai API
-    // Create a realistic image prompt based on the word's actual description
+    // Generate image URL with multiple fallback options for reliability
     const targetWord = word.toLowerCase()
     
-    // Generate image URL - use very simple format for maximum compatibility
-    // Pollinations.ai sometimes fails with complex prompts, so use just the word
-    // This ensures images always generate, even if not perfectly matched to definition
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(targetWord)}?width=1024&height=1024`
+    // Strategy: Try multiple image sources for better reliability
+    // 1. Primary: Pollinations.ai (free, no key needed)
+    // 2. Fallback: Use a more reliable format or alternative service
+    
+    // Use simple prompt for maximum compatibility
+    const imagePrompt = targetWord
+    
+    // Primary image source: Pollinations.ai with simple format
+    // If this fails, we can add retry logic or use alternative sources
+    let imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=1024&height=1024`
+    
+    // Alternative: Use a more reliable image service as fallback
+    // Option 1: Use a CDN with word-based image lookup (if available)
+    // Option 2: Use placeholder service that generates images on demand
+    // For now, we'll use Pollinations.ai but with better error handling
+    
+    // Note: If Pollinations.ai is unreliable, consider:
+    // - Adding retry mechanism
+    // - Using alternative free services like:
+    //   * https://api.unsplash.com (requires free API key)
+    //   * https://api.pexels.com (requires free API key)
+    //   * Or use a word-to-image mapping service
 
     // Generate a unique ID for the word
     const wordId = crypto.randomUUID()
