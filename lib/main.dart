@@ -76,7 +76,21 @@ class _MainNavScreenState extends State<MainNavScreen> {
   @override
   void initState() {
     super.initState();
-    _loadUserInfo();
+    _ensureUserLoggedIn();
+  }
+  
+  Future<void> _ensureUserLoggedIn() async {
+    // 确保用户已登录
+    try {
+      await _userService.ensureLoggedIn();
+      await _loadUserInfo();
+      // 强制刷新 UI
+      if (mounted) {
+        setState(() {});
+      }
+    } catch (e) {
+      print("Error ensuring login: $e");
+    }
   }
   
   Future<void> _loadUserInfo() async {
@@ -136,46 +150,72 @@ class _MainNavScreenState extends State<MainNavScreen> {
                 style: const TextStyle(fontSize: 18),
               ),
             ),
-            // 用户信息
-            PopupMenuButton<String>(
-              icon: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(Icons.person, size: 20),
-                  const SizedBox(width: 4),
-                  Text(
-                    'ID: ${_userService.getShortUserId()}',
-                    style: const TextStyle(fontSize: 12),
+            // 用户信息 - 更明显的显示
+            Builder(
+              builder: (context) {
+                final userId = _userService.getShortUserId();
+                final isLoggedIn = _userService.isLoggedIn;
+                
+                return PopupMenuButton<String>(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: isLoggedIn ? Colors.blue.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: isLoggedIn ? Colors.blue : Colors.grey,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.person,
+                          size: 18,
+                          color: isLoggedIn ? Colors.blue : Colors.grey,
+                        ),
+                        const SizedBox(width: 6),
+                        Text(
+                          userId,
+                          style: TextStyle(
+                            fontSize: 13,
+                            fontWeight: FontWeight.bold,
+                            color: isLoggedIn ? Colors.blue : Colors.grey,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
-                ],
-              ),
-              itemBuilder: (context) => [
-                PopupMenuItem(
-                  enabled: false,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text('用户 ID: ${_userService.getShortUserId()}'),
-                      Text('词汇数: $_vocabCount', style: const TextStyle(fontSize: 12, color: Colors.grey)),
-                    ],
-                  ),
-                ),
-                const PopupMenuDivider(),
-                PopupMenuItem(
-                  value: 'switch',
-                  child: const Row(
-                    children: [
-                      Icon(Icons.swap_horiz, size: 18),
-                      SizedBox(width: 8),
-                      Text('切换用户'),
-                    ],
-                  ),
-                ),
-              ],
-              onSelected: (value) {
-                if (value == 'switch') {
-                  _switchUser();
-                }
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      enabled: false,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('用户 ID: ${_userService.getShortUserId()}'),
+                          Text('词汇数: $_vocabCount', style: const TextStyle(fontSize: 12, color: Colors.grey)),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuDivider(),
+                    PopupMenuItem(
+                      value: 'switch',
+                      child: const Row(
+                        children: [
+                          Icon(Icons.swap_horiz, size: 18),
+                          SizedBox(width: 8),
+                          Text('切换用户'),
+                        ],
+                      ),
+                    ),
+                  ],
+                  onSelected: (value) {
+                    if (value == 'switch') {
+                      _switchUser();
+                    }
+                  },
+                );
               },
             ),
           ],
