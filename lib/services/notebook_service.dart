@@ -40,8 +40,13 @@ class NotebookService {
           final response = await _supabase.auth.signInAnonymously();
           currentUser = response.user;
           if (currentUser != null) {
-            print("✅ Anonymous login successful: ${currentUser.id}");
-            break;
+            final userId = currentUser.id;
+            if (userId.isNotEmpty) {
+              print("✅ Anonymous login successful: $userId");
+              break;
+            } else {
+              lastError = "用户ID为空";
+            }
           } else {
             lastError = "登录响应为空";
           }
@@ -155,18 +160,30 @@ class NotebookService {
   Future<List<Word>> getUserNotebookWords() async {
     if (_userId.isEmpty) return [];
     
-    final data = await _supabase
-        .from('user_vocab')
-        .select('word_id, words(*)') // 关联查询
-        .eq('user_id', _userId)
-        .order('created_at');
+    try {
+      final response = await _supabase
+          .from('user_vocab')
+          .select('word_id, words(*)') // 关联查询
+          .eq('user_id', _userId)
+          .order('created_at');
 
-    List<Word> words = [];
-    for (var item in data) {
-      if (item['words'] != null) {
-        words.add(Word.fromJson(item['words']));
+      if (response == null) return [];
+      
+      List<Word> words = [];
+      for (var item in response) {
+        if (item != null && item['words'] != null) {
+          try {
+            words.add(Word.fromJson(item['words']));
+          } catch (e) {
+            print("Error parsing word: $e");
+            // 跳过无效的数据
+          }
+        }
       }
+      return words;
+    } catch (e) {
+      print("Error loading notebook words: $e");
+      return [];
     }
-    return words;
   }
 }

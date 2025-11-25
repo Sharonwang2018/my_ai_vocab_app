@@ -89,3 +89,4 @@ curl -X POST https://xsqeicialxvfzfzxjorn.supabase.co/functions/v1/search-word \
 
 部署完成后，应用应该可以完全正常工作了！
 
+

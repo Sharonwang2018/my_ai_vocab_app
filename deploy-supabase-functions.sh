@@ -82,3 +82,4 @@ echo "   - https://$PROJECT_REF.supabase.co/functions/v1/generate-story"
 echo ""
 echo "💡 如果遇到问题，请查看 SUPABASE_SETUP.md"
 
+

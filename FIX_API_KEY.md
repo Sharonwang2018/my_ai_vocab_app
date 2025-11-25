@@ -87,3 +87,4 @@ node test-deepseek-direct.js
 http://my-ai-vocab-app-deploy.s3-website-us-east-1.amazonaws.com
 ```
 
+

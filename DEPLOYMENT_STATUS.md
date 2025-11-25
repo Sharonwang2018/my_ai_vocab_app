@@ -135,3 +135,4 @@ curl -X POST https://xsqeicialxvfzfzxjorn.supabase.co/functions/v1/search-word \
 
 如果前端遇到问题，主要是环境变量配置问题，可以快速修复。
 
+

@@ -104,3 +104,4 @@ CREATE POLICY "Users can delete their own vocab"
 - ✅ 再次点击可以取消收藏
 - ✅ 浏览器控制台没有错误
 
+

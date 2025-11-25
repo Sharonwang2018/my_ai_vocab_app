@@ -97,3 +97,4 @@ supabase.auth.signInAnonymously().then(({ data, error }) => {
 2. Supabase Dashboard -> Logs 中的错误
 3. 具体的错误消息
 
+

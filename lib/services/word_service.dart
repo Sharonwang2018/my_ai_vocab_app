@@ -13,10 +13,15 @@ class WordService {
       );
 
       if (response.status != 200) {
-        throw Exception('AI 生成失败');
+        throw Exception('AI 生成失败: HTTP ${response.status}');
       }
 
-      return Word.fromJson(response.data);
+      final data = response.data;
+      if (data == null) {
+        throw Exception('AI 生成失败: 响应数据为空');
+      }
+
+      return Word.fromJson(data);
     } catch (e) {
       print('API Error: $e');
       rethrow;

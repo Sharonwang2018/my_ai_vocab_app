@@ -84,3 +84,4 @@ curl -X POST https://xsqeicialxvfzfzxjorn.supabase.co/functions/v1/generate-stor
 - [ ] 测试函数调用成功
 - [ ] 应用可以正常搜索单词
 
+

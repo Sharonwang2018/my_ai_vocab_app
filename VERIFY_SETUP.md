@@ -105,3 +105,4 @@ supabase.auth.signInAnonymously().then(({ data, error }) => {
 ### 错误 3: "Anonymous sign-ins are disabled"
 **解决**: 已启用，但可能需要刷新页面或清除缓存
 
+

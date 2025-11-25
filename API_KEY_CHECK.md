@@ -73,3 +73,4 @@ curl -X POST https://api.deepseek.com/v1/chat/completions \
 2. 如果 key 无效，获取新的 DeepSeek API key
 3. 更新 Secrets 后重新测试
 
+

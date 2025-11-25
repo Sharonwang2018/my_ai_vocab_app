@@ -32,3 +32,4 @@ echo "  2. 在 Dashboard 中创建/更新 search-word 函数"
 echo "  3. 复制 supabase/functions/generate-story/index.ts 的内容"
 echo "  4. 在 Dashboard 中创建/更新 generate-story 函数"
 
+

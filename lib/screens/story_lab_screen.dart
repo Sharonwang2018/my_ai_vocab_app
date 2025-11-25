@@ -35,12 +35,19 @@ class _StoryLabScreenState extends State<StoryLabScreen> {
       final res = await Supabase.instance.client.functions.invoke('generate-story', body: {
         'wordIds': _selectedIds.toList(), 'theme': 'Funny Adventure'
       });
-      if (mounted) setState(() { _story = res.data['story']; _loading = false; });
+      if (mounted) {
+        final storyData = res.data;
+        final story = storyData != null && storyData is Map ? storyData['story'] : null;
+        setState(() { 
+          _story = story?.toString() ?? '生成失败，请重试';
+          _loading = false; 
+        });
+      }
     } catch (e) {
       print("Error: $e"); // 打印错误方便调试
       if (mounted) {
         setState(() => _loading = false);
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("生成失败，请重试")));
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("生成失败: ${e.toString()}")));
       }
     }
   }

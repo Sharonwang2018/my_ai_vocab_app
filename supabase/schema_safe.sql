@@ -62,3 +62,4 @@ CREATE POLICY "Users can delete their own vocab"
   ON user_vocab FOR DELETE
   USING (auth.uid() = user_id);
 
+

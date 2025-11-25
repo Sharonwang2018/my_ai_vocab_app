@@ -347,3 +347,4 @@ http://my-ai-vocab-app-deploy.s3-website-us-east-1.amazonaws.com
 - ✅ 使用免费的 Pollinations.ai 生成图片
 - ✅ 从收藏的单词生成故事
 
+

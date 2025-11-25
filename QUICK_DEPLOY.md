@@ -81,3 +81,4 @@ http://my-ai-vocab-app-deploy.s3-website-us-east-1.amazonaws.com
 - `SUPABASE_SETUP.md` - 完整部署说明
 - `ENV_SETUP.md` - 环境变量配置说明
 
+

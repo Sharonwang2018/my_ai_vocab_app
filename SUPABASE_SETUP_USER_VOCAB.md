@@ -79,3 +79,4 @@ SELECT * FROM pg_policies WHERE tablename = 'user_vocab';
 2. 检查 Supabase Dashboard -> Logs 中的错误
 3. 确认 `words` 表存在且 `word_id` 有效
 
+

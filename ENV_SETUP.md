@@ -73,3 +73,4 @@ aws amplify update-app \
 aws amplify get-app --app-id d1udenwop4xl8j --output json | grep -A 10 environmentVariables
 ```
 
+

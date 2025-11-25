@@ -107,3 +107,4 @@ curl -X POST https://xsqeicialxvfzfzxjorn.supabase.co/functions/v1/search-word \
 3. **更新 Supabase Secrets** - 使用新的有效 key
 4. **重新部署函数** - 确保使用新的 key
 
+

@@ -85,3 +85,4 @@ CREATE POLICY "Users can delete their own vocab" ON user_vocab FOR DELETE USING 
 
 检查浏览器控制台（F12）的错误信息，告诉我具体的错误内容。
 
+
