@@ -55,8 +55,7 @@ class _StoryLabScreenState extends State<StoryLabScreen> {
   @override
   Widget build(BuildContext context) {
     // AppBar 由 MainNavScreen 统一管理
-    return Scaffold(
-      body: Padding(
+    return Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -113,7 +112,6 @@ class _StoryLabScreenState extends State<StoryLabScreen> {
             )
           ],
         ),
-      ),
     );
   }
 }

@@ -83,13 +83,13 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            // 搜索框
-            TextField(
+    // AppBar 由 MainNavScreen 统一管理
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        children: [
+          // 搜索框
+          TextField(
               controller: _controller,
               style: const TextStyle(fontSize: 18),
               decoration: InputDecoration(
@@ -111,7 +111,6 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
             if (_currentWord != null && !_isLoading) _buildCard(),
           ],
         ),
-      ),
     );
   }
 

@@ -105,48 +105,45 @@ class NotebookService {
       final isSaved = await isWordSaved(wordId);
       if (isSaved) {
         // 删除收藏
-        final deleteResponse = await _supabase
-            .from('user_vocab')
-            .delete()
-            .eq('user_id', currentUserId)
-            .eq('word_id', wordId);
-        
-        if (deleteResponse.hasError) {
-          final error = deleteResponse.error;
-          print("❌ Delete error: ${error?.message}");
-          throw Exception("删除失败: ${error?.message ?? '未知错误'}\n\n可能原因：\n- user_vocab 表不存在\n- RLS 策略阻止操作\n- 权限不足");
+        try {
+          await _supabase
+              .from('user_vocab')
+              .delete()
+              .eq('user_id', currentUserId)
+              .eq('word_id', wordId);
+        } catch (e) {
+          print("❌ Delete error: $e");
+          throw Exception("删除失败: $e\n\n可能原因：\n- user_vocab 表不存在\n- RLS 策略阻止操作\n- 权限不足");
         }
       } else {
         // 添加收藏
-        final insertResponse = await _supabase
-            .from('user_vocab')
-            .insert({
-              'user_id': currentUserId,
-              'word_id': wordId,
-            });
-        
-        if (insertResponse.hasError) {
-          final error = insertResponse.error;
-          print("❌ Insert error: ${error?.message}");
+        try {
+          await _supabase
+              .from('user_vocab')
+              .insert({
+                'user_id': currentUserId,
+                'word_id': wordId,
+              });
+        } catch (e) {
+          print("❌ Insert error: $e");
+          final errorMsg = e.toString();
           
-          if (error?.message?.contains('duplicate') ?? false) {
+          if (errorMsg.contains('duplicate') || errorMsg.contains('unique')) {
             // 如果已存在，忽略错误
             return;
           }
           
           // 检查是否是表不存在
-          if (error?.message?.contains('relation') ?? false || 
-              error?.message?.contains('does not exist') ?? false) {
+          if (errorMsg.contains('relation') || errorMsg.contains('does not exist')) {
             throw Exception("数据库表不存在！\n\n请在 Supabase SQL Editor 中执行 schema.sql 创建表。");
           }
           
           // 检查是否是权限问题
-          if (error?.message?.contains('permission') ?? false || 
-              error?.message?.contains('policy') ?? false) {
+          if (errorMsg.contains('permission') || errorMsg.contains('policy')) {
             throw Exception("权限不足！\n\n请检查：\n1. user_vocab 表的 RLS 策略\n2. Anonymous 认证已启用");
           }
           
-          throw Exception("保存失败: ${error?.message ?? '未知错误'}");
+          throw Exception("保存失败: $errorMsg");
         }
       }
     } catch (e) {
