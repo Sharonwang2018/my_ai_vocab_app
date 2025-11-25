@@ -117,32 +117,10 @@ IMPORTANT: The definition_en_simple must be ACCURATE and match standard dictiona
     // Create a realistic image prompt based on the word's actual description
     const targetWord = word.toLowerCase()
     
-    // Build a realistic image prompt from the AI-generated content
-    let imagePrompt = targetWord
-    if (aiContent.definition_en_simple) {
-      // Use the simple English definition to create a more accurate image prompt
-      const simpleDef = aiContent.definition_en_simple.toLowerCase()
-      // Extract key descriptive words (remove common words and punctuation)
-      const commonWords = ['a', 'an', 'the', 'is', 'are', 'that', 'this', 'with', 'for', 'and', 'or', 'but', 'on', 'in', 'at', 'to', 'of', 'usually', 'often']
-      const words = simpleDef
-        .replace(/[.,;:!?()]/g, ' ') // Remove punctuation
-        .split(/\s+/)
-        .filter(w => w.length > 2 && !commonWords.includes(w))
-        .slice(0, 3) // Take first 3 meaningful words
-      
-      if (words.length > 0) {
-        // Build a simple, clean prompt
-        imagePrompt = `${targetWord} ${words.join(' ')} realistic photograph`
-      } else {
-        imagePrompt = `${targetWord} realistic photograph`
-      }
-    } else {
-      imagePrompt = `${targetWord} realistic photograph`
-    }
-    
-    // Generate image URL - use simple, clean format
-    // Pollinations.ai works best with simple prompts
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=1024&height=1024`
+    // Generate image URL - use very simple format for maximum compatibility
+    // Pollinations.ai sometimes fails with complex prompts, so use just the word
+    // This ensures images always generate, even if not perfectly matched to definition
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(targetWord)}?width=1024&height=1024`
 
     // Generate a unique ID for the word
     const wordId = crypto.randomUUID()
