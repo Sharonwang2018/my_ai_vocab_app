@@ -103,33 +103,54 @@ class NotebookService {
     
     try {
       final isSaved = await isWordSaved(wordId);
+      print("📝 Current saved state: $isSaved for wordId: $wordId");
+      
       if (isSaved) {
         // 删除收藏
+        print("🗑️ Attempting to delete favorite...");
         try {
-          await _supabase
+          final deleteResult = await _supabase
               .from('user_vocab')
               .delete()
               .eq('user_id', currentUserId)
-              .eq('word_id', wordId);
+              .eq('word_id', wordId)
+              .select();
+          
+          print("✅ Delete successful: $deleteResult");
         } catch (e) {
           print("❌ Delete error: $e");
-          throw Exception("删除失败: $e\n\n可能原因：\n- user_vocab 表不存在\n- RLS 策略阻止操作\n- 权限不足");
+          final errorMsg = e.toString();
+          
+          if (errorMsg.contains('relation') || errorMsg.contains('does not exist')) {
+            throw Exception("数据库表不存在！\n\n请在 Supabase SQL Editor 中执行 schema.sql 创建表。");
+          }
+          
+          if (errorMsg.contains('permission') || errorMsg.contains('policy')) {
+            throw Exception("权限不足！\n\n请检查：\n1. user_vocab 表的 RLS 策略\n2. Anonymous 认证已启用");
+          }
+          
+          throw Exception("删除失败: $errorMsg");
         }
       } else {
         // 添加收藏
+        print("➕ Attempting to add favorite...");
         try {
-          await _supabase
+          final insertResult = await _supabase
               .from('user_vocab')
               .insert({
                 'user_id': currentUserId,
                 'word_id': wordId,
-              });
+              })
+              .select();
+          
+          print("✅ Insert successful: $insertResult");
         } catch (e) {
           print("❌ Insert error: $e");
           final errorMsg = e.toString();
           
-          if (errorMsg.contains('duplicate') || errorMsg.contains('unique')) {
+          if (errorMsg.contains('duplicate') || errorMsg.contains('unique') || errorMsg.contains('violates unique constraint')) {
             // 如果已存在，忽略错误
+            print("ℹ️ Word already saved, ignoring duplicate error");
             return;
           }
           
@@ -139,8 +160,8 @@ class NotebookService {
           }
           
           // 检查是否是权限问题
-          if (errorMsg.contains('permission') || errorMsg.contains('policy')) {
-            throw Exception("权限不足！\n\n请检查：\n1. user_vocab 表的 RLS 策略\n2. Anonymous 认证已启用");
+          if (errorMsg.contains('permission') || errorMsg.contains('policy') || errorMsg.contains('RLS')) {
+            throw Exception("权限不足！\n\n请检查：\n1. user_vocab 表的 RLS 策略\n2. Anonymous 认证已启用\n3. 用户 ID: $currentUserId");
           }
           
           throw Exception("保存失败: $errorMsg");
@@ -148,6 +169,9 @@ class NotebookService {
       }
     } catch (e) {
       print("❌ Toggle save error: $e");
+      print("❌ Error type: ${e.runtimeType}");
+      print("❌ Stack trace: ${StackTrace.current}");
+      
       if (e is Exception) {
         rethrow;
       }
