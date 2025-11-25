@@ -21,9 +21,15 @@ void main() async {
   
   // 尝试匿名登录 (请确保你在 Supabase 后台 -> Authentication -> Providers 开启了 Anonymous)
   try {
-    await Supabase.instance.client.auth.signInAnonymously();
+    final authResponse = await Supabase.instance.client.auth.signInAnonymously();
+    if (authResponse.user == null) {
+      print("Warning: Anonymous login returned null user");
+    } else {
+      print("Anonymous login successful: ${authResponse.user!.id}");
+    }
   } catch (e) {
     print("Auth Init Error: $e");
+    // 不抛出异常，让应用继续运行，但会在收藏时再次尝试登录
   }
 
   runApp(const MyApp());

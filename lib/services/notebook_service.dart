@@ -29,16 +29,29 @@ class NotebookService {
   Future<void> toggleSaveWord(String wordId) async {
     // 确保用户已登录（匿名或正常）
     var currentUser = _supabase.auth.currentUser;
+    
+    // 如果未登录，尝试匿名登录（最多重试2次）
     if (currentUser == null) {
-      try {
-        final response = await _supabase.auth.signInAnonymously();
-        currentUser = response.user;
-        if (currentUser == null) {
-          throw Exception("登录失败，请重试");
+      int retries = 2;
+      while (retries > 0 && currentUser == null) {
+        try {
+          final response = await _supabase.auth.signInAnonymously();
+          currentUser = response.user;
+          if (currentUser != null) {
+            print("Anonymous login successful: ${currentUser.id}");
+            break;
+          }
+        } catch (e) {
+          print("Anonymous login error (retries left: $retries): $e");
+          retries--;
+          if (retries > 0) {
+            await Future.delayed(const Duration(milliseconds: 500));
+          }
         }
-      } catch (e) {
-        print("Anonymous login error: $e");
-        throw Exception("无法登录，请检查网络连接或刷新页面重试");
+      }
+      
+      if (currentUser == null) {
+        throw Exception("无法登录。请确保：1) 网络连接正常 2) Supabase Anonymous 认证已启用 3) 刷新页面重试");
       }
     }
     

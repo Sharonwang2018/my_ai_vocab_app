@@ -122,11 +122,16 @@ IMPORTANT: The definition_en_simple must be ACCURATE and match standard dictiona
     if (aiContent.definition_en_simple) {
       // Use the simple English definition to create a more accurate image prompt
       const simpleDef = aiContent.definition_en_simple.toLowerCase()
-      // Extract key descriptive words (remove common words)
-      const commonWords = ['a', 'an', 'the', 'is', 'are', 'that', 'this', 'with', 'for', 'and', 'or', 'but']
-      const words = simpleDef.split(/\s+/).filter(w => w.length > 3 && !commonWords.includes(w))
+      // Extract key descriptive words (remove common words and punctuation)
+      const commonWords = ['a', 'an', 'the', 'is', 'are', 'that', 'this', 'with', 'for', 'and', 'or', 'but', 'on', 'in', 'at', 'to', 'of']
+      const words = simpleDef
+        .replace(/[.,;:!?()]/g, ' ') // Remove punctuation
+        .split(/\s+/)
+        .filter(w => w.length > 3 && !commonWords.includes(w))
+        .slice(0, 4) // Take first 4 meaningful words
+      
       if (words.length > 0) {
-        imagePrompt = `${targetWord}, ${words.slice(0, 3).join(', ')}, realistic, high quality, detailed`
+        imagePrompt = `${targetWord}, ${words.join(', ')}, realistic, high quality, detailed, photograph`
       } else {
         imagePrompt = `${targetWord}, realistic, high quality, detailed, photograph`
       }
@@ -134,7 +139,8 @@ IMPORTANT: The definition_en_simple must be ACCURATE and match standard dictiona
       imagePrompt = `${targetWord}, realistic, high quality, detailed, photograph`
     }
     
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=1024&height=1024&model=flux&enhance=true`
+    // Generate image URL - use simpler URL format for better compatibility
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=1024&height=1024`
 
     // Generate a unique ID for the word
     const wordId = crypto.randomUUID()
