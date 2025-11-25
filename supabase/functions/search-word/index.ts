@@ -116,47 +116,57 @@ Return JSON:
     // Create a realistic image prompt based on the word's actual meaning
     const targetWord = word.toLowerCase()
     
+    // First, check for special cases (greetings, common words)
+    const greetingWords = ['hi', 'hello', 'hey', 'greetings', 'goodbye', 'bye', 'good morning', 'good afternoon', 'good evening']
+    const isGreeting = greetingWords.some(g => targetWord === g || targetWord.includes(g))
+    
     // Build a more accurate image prompt from the AI-generated content
     let imagePrompt = targetWord
     
-    if (aiContent.definition_en_simple) {
+    // Special handling for greetings - prioritize this over definition extraction
+    if (isGreeting) {
+      imagePrompt = `friendly greeting, person waving hand, smiling face, happy expression, realistic, high quality, detailed, photograph`
+    } else if (aiContent.definition_en_simple) {
       const simpleDef = aiContent.definition_en_simple.toLowerCase()
+      const partOfSpeech = aiContent.part_of_speech?.toLowerCase() || ''
       
-      // Comprehensive stop words list
-      const stopWords = new Set([
-        'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
-        'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should',
-        'can', 'could', 'may', 'might', 'must', 'shall', 'that', 'this',
-        'these', 'those', 'with', 'for', 'and', 'or', 'but', 'to', 'of',
-        'in', 'on', 'at', 'by', 'from', 'as', 'it', 'its', 'they', 'them',
-        'used', 'typically', 'usually', 'often', 'sometimes', 'generally',
-        'expression', 'word', 'term', 'means', 'meaning', 'refers', 'called'
-      ])
-      
-      // Extract meaningful words (nouns, verbs, adjectives) from definition
-      const words = simpleDef
-        .replace(/[^\w\s]/g, ' ') // Remove punctuation
-        .split(/\s+/)
-        .filter(w => w.length > 3 && !stopWords.has(w))
-        .slice(0, 5) // Take first 5 meaningful words
-      
-      if (words.length > 0) {
-        // Create a descriptive prompt based on the word's meaning
-        imagePrompt = `${targetWord}, ${words.join(', ')}, realistic, high quality, detailed, photograph`
+      // Check part of speech first for interjections
+      if (partOfSpeech.includes('interjection') || partOfSpeech.includes('greeting')) {
+        imagePrompt = `friendly greeting, person waving hand, smiling face, happy expression, realistic, high quality, detailed, photograph`
       } else {
-        // Fallback: use word with descriptive context based on part of speech
-        const partOfSpeech = aiContent.part_of_speech?.toLowerCase() || ''
-        if (partOfSpeech.includes('verb')) {
-          imagePrompt = `${targetWord} action, realistic, high quality, detailed, photograph`
-        } else if (partOfSpeech.includes('noun')) {
-          imagePrompt = `${targetWord} object, realistic, high quality, detailed, photograph`
-        } else if (partOfSpeech.includes('adjective')) {
-          imagePrompt = `${targetWord} quality, realistic, high quality, detailed, photograph`
-        } else if (partOfSpeech.includes('interjection') || partOfSpeech.includes('greeting')) {
-          // Special handling for greetings like "hi"
-          imagePrompt = `friendly greeting, waving hand, smiling person, realistic, high quality, detailed, photograph`
+        // Comprehensive stop words list
+        const stopWords = new Set([
+          'a', 'an', 'the', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+          'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should',
+          'can', 'could', 'may', 'might', 'must', 'shall', 'that', 'this',
+          'these', 'those', 'with', 'for', 'and', 'or', 'but', 'to', 'of',
+          'in', 'on', 'at', 'by', 'from', 'as', 'it', 'its', 'they', 'them',
+          'used', 'typically', 'usually', 'often', 'sometimes', 'generally',
+          'expression', 'word', 'term', 'means', 'meaning', 'refers', 'called',
+          'informal', 'formal', 'casual', 'situations', 'among', 'attract', 'attention'
+        ])
+        
+        // Extract meaningful words (nouns, verbs, adjectives) from definition
+        const words = simpleDef
+          .replace(/[^\w\s]/g, ' ') // Remove punctuation
+          .split(/\s+/)
+          .filter(w => w.length > 3 && !stopWords.has(w))
+          .slice(0, 5) // Take first 5 meaningful words
+        
+        if (words.length > 0) {
+          // Create a descriptive prompt based on the word's meaning
+          imagePrompt = `${targetWord}, ${words.join(', ')}, realistic, high quality, detailed, photograph`
         } else {
-          imagePrompt = `${targetWord}, realistic, high quality, detailed, photograph`
+          // Fallback: use word with descriptive context based on part of speech
+          if (partOfSpeech.includes('verb')) {
+            imagePrompt = `${targetWord} action, realistic, high quality, detailed, photograph`
+          } else if (partOfSpeech.includes('noun')) {
+            imagePrompt = `${targetWord} object, realistic, high quality, detailed, photograph`
+          } else if (partOfSpeech.includes('adjective')) {
+            imagePrompt = `${targetWord} quality, realistic, high quality, detailed, photograph`
+          } else {
+            imagePrompt = `${targetWord}, realistic, high quality, detailed, photograph`
+          }
         }
       }
     } else {
