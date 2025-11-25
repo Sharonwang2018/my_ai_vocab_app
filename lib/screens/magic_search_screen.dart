@@ -4,6 +4,7 @@ import 'dart:html' as html;
 import '../models/word_model.dart';
 import '../services/word_service.dart';
 import '../services/notebook_service.dart';
+import '../services/user_service.dart';
 
 class MagicSearchScreen extends StatefulWidget {
   const MagicSearchScreen({super.key});
@@ -15,6 +16,7 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
   final _controller = TextEditingController();
   final _wordService = WordService();
   final _notebookService = NotebookService();
+  final _userService = UserService();
   
   Word? _currentWord;
   bool _isLoading = false;
@@ -88,6 +90,58 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
       padding: const EdgeInsets.all(20),
       child: Column(
         children: [
+          // 用户信息显示（更明显）
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            margin: const EdgeInsets.only(bottom: 20),
+            decoration: BoxDecoration(
+              color: _userService.isLoggedIn ? Colors.blue.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: _userService.isLoggedIn ? Colors.blue : Colors.grey,
+                width: 2,
+              ),
+            ),
+            child: Row(
+              children: [
+                Icon(
+                  Icons.person,
+                  color: _userService.isLoggedIn ? Colors.blue : Colors.grey,
+                  size: 24,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        _userService.isLoggedIn ? '已登录' : '未登录',
+                        style: TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: _userService.isLoggedIn ? Colors.blue : Colors.grey,
+                        ),
+                      ),
+                      Text(
+                        '用户 ID: ${_userService.getShortUserId()}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[700],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                if (_userService.isLoggedIn)
+                  Icon(
+                    Icons.check_circle,
+                    color: Colors.green,
+                    size: 20,
+                  ),
+              ],
+            ),
+          ),
           // 搜索框
           TextField(
               controller: _controller,
