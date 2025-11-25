@@ -1,5 +1,5 @@
 -- ============================================
--- Supabase 数据库表结构
+-- Supabase 数据库表结构（安全版本 - 可重复执行）
 -- ============================================
 
 -- 1. 创建 words 表（单词表）
@@ -24,9 +24,6 @@ DROP POLICY IF EXISTS "Anyone can view words" ON words;
 CREATE POLICY "Anyone can view words"
   ON words FOR SELECT
   USING (true);
-
--- RLS 策略：只允许服务角色插入/更新单词（通过 Edge Functions）
--- 注意：这个策略允许通过 service_role_key 插入，普通用户不能直接插入
 
 -- ============================================
 
@@ -64,35 +61,4 @@ DROP POLICY IF EXISTS "Users can delete their own vocab" ON user_vocab;
 CREATE POLICY "Users can delete their own vocab"
   ON user_vocab FOR DELETE
   USING (auth.uid() = user_id);
-
--- ============================================
--- 表结构说明
--- ============================================
-
--- words 表字段：
---   - id: UUID 主键
---   - word: 单词文本（唯一）
---   - content: JSONB 包含定义、词性、音标等
---     {
---       "definition_zh": "中文定义",
---       "definition_en_simple": "英文定义",
---       "definition_ai_kid": "儿童友好解释",
---       "part_of_speech": "词性",
---       "phonetic_us": "美式音标",
---       "phonetic_uk": "英式音标",
---       "tags": ["标签1", "标签2"]
---     }
---   - assets: JSONB 包含图片等资源
---     {
---       "image_url": "图片URL"
---     }
---   - created_at: 创建时间
---   - updated_at: 更新时间
-
--- user_vocab 表字段：
---   - id: UUID 主键
---   - user_id: 用户ID（外键到 auth.users）
---   - word_id: 单词ID（外键到 words）
---   - created_at: 收藏时间
---   - UNIQUE(user_id, word_id): 确保每个用户每个单词只收藏一次
 
