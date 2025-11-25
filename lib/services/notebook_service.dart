@@ -58,7 +58,33 @@ class NotebookService {
       if (currentUser == null) {
         // 提供更详细的错误信息
         final errorMsg = lastError ?? "未知错误";
-        throw Exception("无法登录: $errorMsg\n\n请检查：\n1. Supabase Dashboard -> Authentication -> Providers -> Anonymous 已启用\n2. 网络连接正常\n3. 刷新页面重试");
+        
+        // 检查是否是 Anonymous 未启用的错误
+        String helpText = "";
+        if (errorMsg.contains('anonymous_provider_disabled') || 
+            errorMsg.contains('Anonymous sign-ins are disabled')) {
+          helpText = """
+❌ Anonymous 认证未启用！
+
+🔧 解决步骤：
+1. 访问: https://supabase.com/dashboard/project/xsqeicialxvfzfzxjorn/auth/providers
+2. 找到 "Anonymous" 提供商
+3. 点击并启用 "Enable Anonymous sign-ins" 开关
+4. 点击 "Save" 保存
+5. 刷新页面重试
+
+📝 详细步骤: 查看 ENABLE_ANONYMOUS_AUTH.md
+""";
+        } else {
+          helpText = """
+请检查：
+1. Supabase Dashboard -> Authentication -> Providers -> Anonymous 已启用
+2. 网络连接正常
+3. 刷新页面重试
+""";
+        }
+        
+        throw Exception("无法登录: $errorMsg\n\n$helpText");
       }
     }
     
