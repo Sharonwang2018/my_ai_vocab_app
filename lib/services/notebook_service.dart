@@ -30,28 +30,35 @@ class NotebookService {
     // 确保用户已登录（匿名或正常）
     var currentUser = _supabase.auth.currentUser;
     
-    // 如果未登录，尝试匿名登录（最多重试2次）
+    // 如果未登录，尝试匿名登录（最多重试3次）
     if (currentUser == null) {
-      int retries = 2;
+      int retries = 3;
+      String? lastError;
+      
       while (retries > 0 && currentUser == null) {
         try {
           final response = await _supabase.auth.signInAnonymously();
           currentUser = response.user;
           if (currentUser != null) {
-            print("Anonymous login successful: ${currentUser.id}");
+            print("✅ Anonymous login successful: ${currentUser.id}");
             break;
+          } else {
+            lastError = "登录响应为空";
           }
         } catch (e) {
-          print("Anonymous login error (retries left: $retries): $e");
+          lastError = e.toString();
+          print("❌ Anonymous login error (retries left: $retries): $e");
           retries--;
           if (retries > 0) {
-            await Future.delayed(const Duration(milliseconds: 500));
+            await Future.delayed(const Duration(milliseconds: 1000));
           }
         }
       }
       
       if (currentUser == null) {
-        throw Exception("无法登录。请确保：1) 网络连接正常 2) Supabase Anonymous 认证已启用 3) 刷新页面重试");
+        // 提供更详细的错误信息
+        final errorMsg = lastError ?? "未知错误";
+        throw Exception("无法登录: $errorMsg\n\n请检查：\n1. Supabase Dashboard -> Authentication -> Providers -> Anonymous 已启用\n2. 网络连接正常\n3. 刷新页面重试");
       }
     }
     
@@ -71,7 +78,9 @@ class NotebookService {
             .eq('word_id', wordId);
         
         if (deleteResponse.hasError) {
-          throw Exception("删除失败: ${deleteResponse.error?.message ?? '未知错误'}");
+          final error = deleteResponse.error;
+          print("❌ Delete error: ${error?.message}");
+          throw Exception("删除失败: ${error?.message ?? '未知错误'}\n\n可能原因：\n- user_vocab 表不存在\n- RLS 策略阻止操作\n- 权限不足");
         }
       } else {
         // 添加收藏
@@ -84,15 +93,30 @@ class NotebookService {
         
         if (insertResponse.hasError) {
           final error = insertResponse.error;
+          print("❌ Insert error: ${error?.message}");
+          
           if (error?.message?.contains('duplicate') ?? false) {
             // 如果已存在，忽略错误
             return;
           }
+          
+          // 检查是否是表不存在
+          if (error?.message?.contains('relation') ?? false || 
+              error?.message?.contains('does not exist') ?? false) {
+            throw Exception("数据库表不存在！\n\n请在 Supabase SQL Editor 中执行 schema.sql 创建表。");
+          }
+          
+          // 检查是否是权限问题
+          if (error?.message?.contains('permission') ?? false || 
+              error?.message?.contains('policy') ?? false) {
+            throw Exception("权限不足！\n\n请检查：\n1. user_vocab 表的 RLS 策略\n2. Anonymous 认证已启用");
+          }
+          
           throw Exception("保存失败: ${error?.message ?? '未知错误'}");
         }
       }
     } catch (e) {
-      print("Toggle save error: $e");
+      print("❌ Toggle save error: $e");
       if (e is Exception) {
         rethrow;
       }
