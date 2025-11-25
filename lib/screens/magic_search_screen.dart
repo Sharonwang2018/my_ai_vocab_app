@@ -24,11 +24,15 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
 
   void _handleSearch() async {
     if (_controller.text.isEmpty) return;
+    final searchWord = _controller.text.trim();
     FocusScope.of(context).unfocus();
     setState(() { _isLoading = true; _currentWord = null; _isSaved = false; });
+    
+    // 搜索成功后清空输入框
+    _controller.clear();
 
     try {
-      final word = await _wordService.searchAndGenerateWord(_controller.text);
+      final word = await _wordService.searchAndGenerateWord(searchWord);
       final isSaved = await _notebookService.isWordSaved(word.id);
       if (mounted) {
         setState(() { _currentWord = word; _isSaved = isSaved; _isLoading = false; });
@@ -158,9 +162,7 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
             ),
             const SizedBox(height: 30),
             
-            if (_isLoading) const Column(
-              children: [CircularProgressIndicator(), SizedBox(height: 10), Text("AI 正在施法...")],
-            ),
+            if (_isLoading) _buildLoadingCard(),
             
             if (_currentWord != null && !_isLoading) _buildCard(),
           ],
@@ -170,6 +172,83 @@ class _MagicSearchScreenState extends State<MagicSearchScreen> {
 
   // 定义一个 Google 蓝颜色常量
   static const Color post_primary_blue = Color(0xFF1A73E8);
+  
+  // 加载状态卡片 - 让用户知道进度，不会退出
+  Widget _buildLoadingCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.blue.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // 旋转的魔法棒动画
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(seconds: 2),
+            builder: (context, value, child) {
+              return Transform.rotate(
+                angle: value * 2 * 3.14159,
+                child: const Icon(
+                  Icons.auto_awesome,
+                  size: 80,
+                  color: Colors.purple,
+                ),
+              );
+            },
+            onEnd: () {
+              if (_isLoading && mounted) {
+                setState(() {}); // 重新触发动画
+              }
+            },
+          ),
+          const SizedBox(height: 30),
+          const Text(
+            "✨ AI 正在施法...",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.purple,
+            ),
+          ),
+          const SizedBox(height: 15),
+          const Text(
+            "正在生成单词释义和图片",
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 30),
+          // 进度条
+          const LinearProgressIndicator(
+            backgroundColor: Colors.grey,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.purple),
+            minHeight: 6,
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            "请稍候，魔法即将完成...",
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
   
   // 图片重试机制：如果主URL失败，尝试备用URL
   Widget _buildImageWithRetry(String imageUrl) {

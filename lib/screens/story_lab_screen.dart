@@ -51,6 +51,83 @@ class _StoryLabScreenState extends State<StoryLabScreen> {
       }
     }
   }
+  
+  // 故事生成加载状态卡片
+  Widget _buildStoryLoadingCard() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(40),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.purple.withOpacity(0.1),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
+          ),
+        ],
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          // 旋转的故事书动画
+          TweenAnimationBuilder<double>(
+            tween: Tween(begin: 0.0, end: 1.0),
+            duration: const Duration(seconds: 2),
+            builder: (context, value, child) {
+              return Transform.rotate(
+                angle: value * 2 * 3.14159,
+                child: const Icon(
+                  Icons.auto_stories,
+                  size: 80,
+                  color: Colors.purple,
+                ),
+              );
+            },
+            onEnd: () {
+              if (_loading && mounted) {
+                setState(() {}); // 重新触发动画
+              }
+            },
+          ),
+          const SizedBox(height: 30),
+          const Text(
+            "📚 AI 正在创作魔法故事...",
+            style: TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.purple,
+            ),
+          ),
+          const SizedBox(height: 15),
+          const Text(
+            "正在将选中的单词编织成精彩故事",
+            style: TextStyle(
+              fontSize: 16,
+              color: Colors.grey,
+            ),
+          ),
+          const SizedBox(height: 30),
+          // 进度条
+          const LinearProgressIndicator(
+            backgroundColor: Colors.grey,
+            valueColor: AlwaysStoppedAnimation<Color>(Colors.purple),
+            minHeight: 6,
+          ),
+          const SizedBox(height: 20),
+          const Text(
+            "请稍候，故事即将完成...",
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -90,7 +167,9 @@ class _StoryLabScreenState extends State<StoryLabScreen> {
           ),
           
           const SizedBox(height: 20),
-          if (_story != null) Container(
+          // 加载状态显示
+          if (_loading) _buildStoryLoadingCard(),
+          if (_story != null && !_loading) Container(
             width: double.infinity,
             constraints: const BoxConstraints(minHeight: 200),
             padding: const EdgeInsets.all(15),
