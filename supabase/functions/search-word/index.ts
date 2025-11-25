@@ -140,7 +140,9 @@ IMPORTANT: The definition_en_simple must be ACCURATE and match standard dictiona
     }
     
     // Generate image URL - use simpler URL format for better compatibility
-    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(imagePrompt)}?width=1024&height=1024`
+    // Pollinations.ai sometimes has issues with complex prompts, so we simplify
+    const simplePrompt = imagePrompt.split(',').slice(0, 3).join(',').trim() // Take first 3 parts
+    const imageUrl = `https://image.pollinations.ai/prompt/${encodeURIComponent(simplePrompt)}?width=1024&height=1024`
 
     // Generate a unique ID for the word
     const wordId = crypto.randomUUID()
